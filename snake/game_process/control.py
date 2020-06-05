@@ -8,7 +8,6 @@ class Control:
         self.flag_direction = "RIGHT"
 
     def control(self):
-        """Управление в зависимости от флага"""
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.flag_game = False
