@@ -1,66 +1,81 @@
 import pygame
+import sys
+import random
 
 
-class Snake:
-    def __init__(self):
-        self.head = [45, 45]
-        self.body = [[45, 45], [34, 45], [23, 45]]
-        self.score = 0
+class Snake():
+    def __init__(self, snake_color):
 
-    def draw_snake(self, window):
-        for segment in self.body:
-            pygame.draw.rect(window, pygame.Color("green"), pygame.Rect(segment[0], segment[1], 10, 10))
+        self.snake_head_pos = [100, 50]  # [x, y]
 
-    def moove(self, control):
-        if control.flag_direction == "RIGHT":
-            self.head[0] += 11
-        elif control.flag_direction == "LEFT":
-            self.head[0] -= 11
-        elif control.flag_direction == "UP":
-            self.head[1] -= 11
-        elif control.flag_direction == "DOWN":
-            self.head[1] += 11
+        self.snake_body = [[100, 50], [90, 50], [80, 50]]
+        self.snake_color = snake_color
 
-    def animation(self):
-        self.body.insert(0, list(self.head))
-        self.body.pop()
+        self.direction = "RIGHT"
 
-    def check_end_window(self):
-        if self.head[0] == 419:
-            self.head[0] = 23
-        elif self.head[0] == 12:
-            self.head[0] = 419
-        elif self.head[1] == 23:
-            self.head[1] = 419
-        elif self.head[1] == 419:
-            self.head[1] = 34
+        self.change_to = self.direction
 
-    def eat(self, food, gui):
-        if self.head[0] == food.food_position_x and self.head[1] == food.food_position_y:
-            self.body.append([food.food_position_x, food.food_position_y])
-            gui.get_new_indicator()
-            food.get_food_position(gui)
-            food.get_blue_food_position(gui)
-            food.get_yellow_food_position(gui)
+    def validate_direction_and_change(self):
 
-        elif self.head[0] == food.blue_food_pos_x and self.head[1] == food.blue_food_pos_y:
-            self.body.append([food.blue_food_pos_x, food.blue_food_pos_y])
-            food.get_food_position(gui)
-            food.get_blue_food_position(gui)
-            gui.get_new_indicator()
-            gui.get_new_indicator()
+        if any((self.change_to == "RIGHT" and not self.direction == "LEFT",
+                self.change_to == "LEFT" and not self.direction == "RIGHT",
+                self.change_to == "UP" and not self.direction == "DOWN",
+                self.change_to == "DOWN" and not self.direction == "UP")):
+            self.direction = self.change_to
 
-        elif self.head[0] == food.yellow_food_pos_x and self.head[1] == food.yellow_food_pos_y:
-            self.body.pop()
-            gui.indicator.pop()
-            food.get_food_position(gui)
-            food.get_blue_food_position(gui)
-            food.get_yellow_food_position(gui)
+    def change_head_position(self):
 
-    def check_barriers(self, gui):
-        if self.head in gui.barrier:
-            self.body.pop()
-            gui.indicator.pop()
-        if self.head in self.body[1:]:
-            self.body.pop()
-            gui.indicator.pop()
+        if self.direction == "RIGHT":
+            self.snake_head_pos[0] += 10
+        elif self.direction == "LEFT":
+            self.snake_head_pos[0] -= 10
+        elif self.direction == "UP":
+            self.snake_head_pos[1] -= 10
+        elif self.direction == "DOWN":
+            self.snake_head_pos[1] += 10
+
+    def snake_body_mechanism(
+            self, score, food_pos, food_yellow_pos, screen_width, screen_height):
+
+        self.snake_body.insert(0, list(self.snake_head_pos))
+
+        if (self.snake_head_pos[0] == food_pos[0] and
+                self.snake_head_pos[1] == food_pos[1]):
+
+            food_pos = [random.randrange(1, screen_width / 10) * 10,
+                        random.randrange(1, screen_height / 10) * 10]
+
+            score += 1
+        elif (self.snake_head_pos[0] == food_yellow_pos[0] and self.snake_head_pos[1] == food_yellow_pos[1]):
+            self.snake_body.pop()
+            self.snake_body.pop()
+            food_yellow_pos = [random.randrange(1, screen_width / 10) * 10,
+                               random.randrange(1, screen_height / 10) * 10]
+            score -= 1
+
+        else:
+            self.snake_body.pop()
+        return score, food_pos, food_yellow_pos
+
+    def draw_snake(self, play_surface, surface_color):
+        """Отображаем все сегменты змеи"""
+        play_surface.fill(surface_color)
+        for pos in self.snake_body:
+            # pygame.Rect(x,y, sizex, sizey)
+            pygame.draw.rect(
+                play_surface, self.snake_color, pygame.Rect(
+                    pos[0], pos[1], 10, 10))
+
+    def check_for_boundaries(self, game_over, screen_width, screen_height, wall_list):
+        if any((
+                self.snake_head_pos[0] > screen_width - 10
+                or self.snake_head_pos[0] < 0,
+                self.snake_head_pos[1] > screen_height - 10
+                or self.snake_head_pos[1] < 0,
+                self.snake_head_pos in wall_list
+        )):
+            game_over()
+        for block in self.snake_body[1:]:
+            if (block[0] == self.snake_head_pos[0] and
+                    block[1] == self.snake_head_pos[1]):
+                game_over()
