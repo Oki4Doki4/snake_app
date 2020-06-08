@@ -16,7 +16,6 @@ class Game:
         self.brown = BROWN
 
         self.fps_controller = pygame.time.Clock()
-
         self.score = SCORE
 
     def init_and_check_for_errors(self):
@@ -25,10 +24,12 @@ class Game:
             sys.exit()
         else:
             print('Ok')
+        return "Ok"
 
     def set_surface_and_title(self):
         self.play_surface = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption('Snake Game')
+        return self.play_surface
 
     def event_loop(self, change_to):
         for event in pygame.event.get():
