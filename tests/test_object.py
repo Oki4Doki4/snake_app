@@ -1,42 +1,37 @@
 import pygame
 import unittest
 import random
-from snake.game_process.control import Control
-from snake.game_object.snake import Snake
-from gui.gui import Gui
-from snake.game_object.food import Food
+from snake.constant import *
+from snake.game_object import Snake, Food, Wall
 
 
 class Test(unittest.TestCase):
     def setUp(self):
-        self.test_snake = Snake()
-        self.test_food = Food()
-        self.test_gui = Gui()
+        self.test_snake = Snake(GREEN, 100, 50)
+        self.test_food = Food(BROWN, FOOD_POS_X, FOOD_POS_Y)
+
+    def test_init_snake(self):
+        test_game_object = Snake(GREEN, 100, 50)
+        self.assertTrue(isinstance(test_game_object, Snake))
+
+    def test_init_food(self):
+        test_food = Food(BLACK, FOOD_POS_X, FOOD_POS_Y)
+        self.assertTrue(isinstance(test_food, Food))
+
+    def test_block_init(self):
+        test_wall = Wall(WALL_POS_Y, WALL_POS_X)
+        self.assertTrue(isinstance(test_wall, Wall))
 
     def test_initialisation_body(self):
-        test_snake_body = [[45, 45], [34, 45], [23, 45]]
-        self.assertEqual(test_snake_body, self.test_snake.body)
+        test_snake_body = [[100, 50], [90, 50], [80, 50]]
+        self.assertEqual(test_snake_body, self.test_snake.snake_body)
 
     def test_initialisation_head(self):
-        test_snake_head = [45, 45]
-        self.assertEqual(test_snake_head, self.test_snake.head)
+        test_snake_head = [100, 50]
+        self.assertEqual(test_snake_head, self.test_snake.snake_head_pos)
 
     def test_animation_snake(self):
-        self.body = [[45, 45], [34, 45], [23, 45]]
-        self.head = [45, 45]
-        default_snake = self.body.insert(0, list(self.head))
-        self.assertEqual(self.test_snake.animation(), default_snake)
-
-    def test_default_indicator(self):
-        test_indicator = self.test_gui.indicator
-        self.assertEqual(test_indicator, [[12, 12]])
-
-    def test_append_indicator(self):
-        test_indicator = self.test_gui.indicator.append([self.test_gui.indicator[-1][0] + 11, 12])
-        default_indicator = [[12, 12]]
-        self.assertEqual(test_indicator, [[12, 12]].append([default_indicator[-1][0] + 11, 12]))
-
-    def test_length_indicator(self):
-        test_indicator = self.test_gui.indicator
-        test_indicator.pop()
-        self.assertEqual(len(test_indicator), 0)
+        body = [[100, 50], [90, 50], [80, 50]]
+        head = [100, 50]
+        default_snake = body.insert(0, list(head))
+        self.assertEqual(self.test_snake.snake_body.insert(0, list(head)), default_snake)
