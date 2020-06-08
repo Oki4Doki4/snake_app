@@ -3,12 +3,12 @@ import sys
 import random
 
 
-class Snake():
-    def __init__(self, snake_color):
+class Snake:
+    def __init__(self, snake_color, x, y):
 
-        self.snake_head_pos = [100, 50]  # [x, y]
+        self.snake_head_pos = [x, y]  # [x, y]
 
-        self.snake_body = [[100, 50], [90, 50], [80, 50]]
+        self.snake_body = [[x, y], [x-10, y], [x-20, y]]
         self.snake_color = snake_color
 
         self.direction = "RIGHT"
@@ -46,7 +46,7 @@ class Snake():
                         random.randrange(1, screen_height / 10) * 10]
 
             score += 1
-        elif (self.snake_head_pos[0] == food_yellow_pos[0] and self.snake_head_pos[1] == food_yellow_pos[1]):
+        elif self.snake_head_pos[0] == food_yellow_pos[0] and self.snake_head_pos[1] == food_yellow_pos[1]:
             self.snake_body.pop()
             self.snake_body.pop()
             food_yellow_pos = [random.randrange(1, screen_width / 10) * 10,
@@ -58,10 +58,8 @@ class Snake():
         return score, food_pos, food_yellow_pos
 
     def draw_snake(self, play_surface, surface_color):
-        """Отображаем все сегменты змеи"""
         play_surface.fill(surface_color)
         for pos in self.snake_body:
-            # pygame.Rect(x,y, sizex, sizey)
             pygame.draw.rect(
                 play_surface, self.snake_color, pygame.Rect(
                     pos[0], pos[1], 10, 10))
@@ -79,3 +77,54 @@ class Snake():
             if (block[0] == self.snake_head_pos[0] and
                     block[1] == self.snake_head_pos[1]):
                 game_over()
+
+
+class Food:
+    def __init__(self, food_color, x, y):
+        self.food_color = food_color
+        self.food_size_x = 10
+        self.food_size_y = 10
+        self.food_pos = [x,y]
+
+        self.food_yellow_pos = [x+20, y+40]
+
+    def draw_food(self, play_surface):
+        pygame.draw.rect(play_surface, self.food_color, pygame.Rect(
+            self.food_pos[0], self.food_pos[1],
+            self.food_size_x, self.food_size_y))
+
+    def draw_yellow_food(self, play_surface):
+        pygame.draw.rect(play_surface, pygame.Color("Yellow"), pygame.Rect(
+            self.food_yellow_pos[0], self.food_yellow_pos[1],
+            self.food_size_x, self.food_size_y))
+
+
+class Wall:
+    def __init__(self, pos_x, pos_y):
+
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.wall_list = [self.pos_x, self.pos_y]
+
+    def load_wall(self, name):
+
+        fullname = 'levels/' + name
+        with open(fullname, 'r') as map_file:
+            level_map = []
+            for line in map_file:
+                line = line.strip()
+                level_map.append(line)
+        return level_map
+
+    def create_level(self, level_map):
+        self.wall_list = []
+        self.pos_x = 0
+        self.pos_y = 0
+        for y in range(len(level_map)):
+            for x in range(len(level_map)):
+                if level_map[y][x] == "#":
+                    self.wall_list.append([self.pos_x, self.pos_y])
+                self.pos_x += 20
+            self.pos_x = 0
+            self.pos_y += 20
+        return self.wall_list
